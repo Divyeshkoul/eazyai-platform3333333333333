@@ -10,7 +10,8 @@ const JobConfiguration = ({ onAnalyze, loading = false }) => {
     skills: '',
     experience_range: '0–1 yrs',
     ...DEFAULT_THRESHOLDS,
-    top_n: 0
+    top_n: 0,
+    load_from_blob: true
   });
 
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -18,9 +19,7 @@ const JobConfiguration = ({ onAnalyze, loading = false }) => {
   const styles = {
     container: {
       background: '#ffffff',
-      borderRadius: '8px',
-      border: '1px solid #dadce0',
-      overflow: 'hidden'
+      height: '100%'
     },
     header: {
       padding: '20px 24px',
@@ -54,7 +53,9 @@ const JobConfiguration = ({ onAnalyze, loading = false }) => {
       margin: '4px 0 0 0'
     },
     body: {
-      padding: '24px'
+      padding: '24px',
+      overflowY: 'auto',
+      height: 'calc(100% - 180px)'
     },
     section: {
       marginBottom: '24px'
@@ -105,7 +106,7 @@ const JobConfiguration = ({ onAnalyze, loading = false }) => {
     },
     grid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+      gridTemplateColumns: '1fr',
       gap: '16px'
     },
     advancedToggle: {
@@ -127,7 +128,7 @@ const JobConfiguration = ({ onAnalyze, loading = false }) => {
     },
     thresholdsGrid: {
       display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+      gridTemplateColumns: '1fr',
       gap: '20px',
       padding: '20px',
       background: '#f8f9fa',
@@ -139,7 +140,12 @@ const JobConfiguration = ({ onAnalyze, loading = false }) => {
       borderTop: '1px solid #f1f3f4',
       display: 'flex',
       gap: '12px',
-      justifyContent: 'flex-end'
+      justifyContent: 'flex-end',
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      background: '#ffffff'
     },
     button: {
       padding: '10px 24px',
@@ -167,6 +173,21 @@ const JobConfiguration = ({ onAnalyze, loading = false }) => {
       fontSize: '12px',
       color: '#5f6368',
       marginTop: '4px'
+    },
+    checkboxLabel: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      cursor: 'pointer',
+      padding: '12px',
+      background: '#f8f9fa',
+      borderRadius: '4px',
+      border: '1px solid #dadce0'
+    },
+    checkbox: {
+      width: '18px',
+      height: '18px',
+      cursor: 'pointer'
     }
   };
 
@@ -186,7 +207,7 @@ const JobConfiguration = ({ onAnalyze, loading = false }) => {
         </div>
         <div style={styles.headerText}>
           <h3 style={styles.title}>Job Configuration</h3>
-          <p style={styles.subtitle}>Configure job requirements and screening thresholds</p>
+          <p style={styles.subtitle}>Configure requirements and thresholds</p>
         </div>
       </div>
 
@@ -225,6 +246,19 @@ const JobConfiguration = ({ onAnalyze, loading = false }) => {
           </div>
 
           <div style={styles.section}>
+            <label style={styles.label}>Required Skills</label>
+            <input
+              type="text"
+              style={styles.input}
+              placeholder="e.g., Python, React, AWS"
+              value={config.skills}
+              onChange={(e) => setConfig({ ...config, skills: e.target.value })}
+              onFocus={(e) => e.target.style.borderColor = '#1a73e8'}
+              onBlur={(e) => e.target.style.borderColor = '#dadce0'}
+            />
+          </div>
+
+          <div style={styles.section}>
             <label style={styles.label}>Experience Range</label>
             <select
               style={styles.select}
@@ -238,20 +272,23 @@ const JobConfiguration = ({ onAnalyze, loading = false }) => {
           </div>
         </div>
 
-        {/* Skills */}
+        {/* Resume Source Selection */}
         <div style={styles.section}>
-          <label style={styles.label}>Required Skills</label>
-          <input
-            type="text"
-            style={styles.input}
-            placeholder="e.g., Python, React, AWS (comma-separated)"
-            value={config.skills}
-            onChange={(e) => setConfig({ ...config, skills: e.target.value })}
-            onFocus={(e) => e.target.style.borderColor = '#1a73e8'}
-            onBlur={(e) => e.target.style.borderColor = '#dadce0'}
-          />
+          <label style={styles.checkboxLabel}>
+            <input
+              type="checkbox"
+              checked={config.load_from_blob}
+              onChange={(e) => setConfig({ ...config, load_from_blob: e.target.checked })}
+              style={styles.checkbox}
+            />
+            <span style={{ fontSize: '14px', fontWeight: 500, color: '#202124' }}>
+              Load from Azure Blob Storage
+            </span>
+          </label>
           <div style={styles.helperText}>
-            Separate multiple skills with commas
+            {config.load_from_blob 
+              ? '✓ Will scan resumes from Azure (including Gmail sync)' 
+              : '✗ Will use manually uploaded resumes only'}
           </div>
         </div>
 
@@ -324,7 +361,7 @@ const JobConfiguration = ({ onAnalyze, loading = false }) => {
       <div style={styles.footer}>
         <button
           style={{ ...styles.button, ...styles.secondaryButton }}
-          onClick={() => setConfig({ jd: '', domain: '', skills: '', experience_range: '0–1 yrs', ...DEFAULT_THRESHOLDS, top_n: 0 })}
+          onClick={() => setConfig({ jd: '', domain: '', skills: '', experience_range: '0–1 yrs', ...DEFAULT_THRESHOLDS, top_n: 0, load_from_blob: true })}
           onMouseEnter={(e) => e.target.style.background = '#f8f9fa'}
           onMouseLeave={(e) => e.target.style.background = '#ffffff'}
         >

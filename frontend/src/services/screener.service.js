@@ -3,9 +3,11 @@ import { ENDPOINTS } from '../utils/constants';
 
 export const screenerService = {
   analyzeResumes: async (jobConfig) => {
+    const { load_from_blob, ...configWithoutFlag } = jobConfig;
+    
     const response = await api.post(ENDPOINTS.ANALYZE, {
-      job_config: jobConfig,
-      load_from_blob: true
+      job_config: configWithoutFlag,
+      load_from_blob: load_from_blob !== false
     });
     return response.data;
   },
@@ -61,6 +63,11 @@ export const screenerService = {
       role,
       company_name: companyName
     });
+    return response.data;
+  },
+
+  clearUploadCache: async () => {
+    const response = await api.delete('/api/screener/clear-cache');
     return response.data;
   }
 };

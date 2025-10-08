@@ -33,7 +33,8 @@ const Header = () => {
       gap: '24px',
       position: 'sticky',
       top: 0,
-      zIndex: 90
+      zIndex: 90,
+      justifyContent: 'space-between'
     },
     searchContainer: {
       flex: 1,
@@ -67,8 +68,9 @@ const Header = () => {
     actions: {
       display: 'flex',
       alignItems: 'center',
-      gap: '8px',
-      position: 'relative'
+      gap: '4px',
+      position: 'relative',
+      marginLeft: 'auto'
     },
     iconButton: {
       width: '40px',
@@ -82,7 +84,8 @@ const Header = () => {
       cursor: 'pointer',
       color: '#5f6368',
       transition: 'background 0.2s',
-      position: 'relative'
+      position: 'relative',
+      flexShrink: 0
     },
     notificationDot: {
       position: 'absolute',
@@ -98,7 +101,7 @@ const Header = () => {
       width: '36px',
       height: '36px',
       borderRadius: '50%',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: '#1E3A8A',
       color: '#ffffff',
       border: 'none',
       display: 'flex',
@@ -108,7 +111,15 @@ const Header = () => {
       fontSize: '13px',
       fontWeight: 600,
       marginLeft: '8px',
-      transition: 'transform 0.2s'
+      transition: 'transform 0.2s',
+      overflow: 'hidden',
+      padding: '0',
+      flexShrink: 0
+    },
+    profileImg: {
+      width: '100%',
+      height: '100%',
+      objectFit: 'contain'
     },
     dropdown: {
       position: 'absolute',
@@ -276,7 +287,15 @@ const Header = () => {
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
           title="Account"
         >
-          EA
+          <img 
+            src={`${process.env.PUBLIC_URL}/logo.png`}
+            alt="Profile" 
+            style={styles.profileImg}
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.parentElement.textContent = 'EA';
+            }}
+          />
         </button>
       </div>
 

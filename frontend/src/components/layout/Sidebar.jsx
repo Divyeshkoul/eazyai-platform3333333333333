@@ -69,18 +69,17 @@ const Sidebar = ({ isOpen, onToggle }) => {
       borderBottom: '1px solid #f1f3f4',
       minHeight: '72px'
     },
-    logo: {
+    logoContainer: {
       width: '32px',
       height: '32px',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      borderRadius: '8px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: '#ffffff',
-      fontSize: '18px',
-      fontWeight: 'bold',
-      flexShrink: 0
+      flexShrink: 0,
+      position: 'relative'
+    },
+    logoImage: {
+      width: '100%',
+      height: '100%',
+      objectFit: 'contain',
+      display: 'block'
     },
     title: {
       fontSize: '20px',
@@ -169,7 +168,17 @@ const Sidebar = ({ isOpen, onToggle }) => {
   return (
     <div style={styles.sidebar}>
       <div style={styles.header}>
-        <div style={styles.logo}>E</div>
+        <div style={styles.logoContainer}>
+          <img 
+            src={`${process.env.PUBLIC_URL}/logo.png`}
+            alt="EazyAI" 
+            style={styles.logoImage}
+            onError={(e) => {
+              e.target.style.display = 'none';
+              e.target.parentElement.innerHTML = '<div style="width:100%;height:100%;background:#1E3A8A;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:16px;">EA</div>';
+            }}
+          />
+        </div>
         <div style={styles.title}>EazyAI</div>
         <button
           style={styles.toggleButton}
@@ -211,13 +220,6 @@ const Sidebar = ({ isOpen, onToggle }) => {
           );
         })}
       </nav>
-
-      <style>{`
-        @keyframes slideIn {
-          from { transform: translateX(-10px); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-      `}</style>
     </div>
   );
 };

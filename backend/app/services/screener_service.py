@@ -21,7 +21,7 @@ client = AzureOpenAI(
     api_version=AZURE_CONFIG["api_version"],
     azure_endpoint=AZURE_CONFIG["azure_endpoint"],
     max_retries=3,
-    timeout=30.0
+    
 )
 
 # Cache for role extraction to avoid repeated calls
@@ -120,7 +120,7 @@ Analyze this resume against the job requirements. Focus on accuracy and be stric
             messages=messages,
             temperature=0.1,
             max_tokens=1000,
-            timeout=25.0
+            
         )
 
         raw_response = response.choices[0].message.content
@@ -133,12 +133,7 @@ Analyze this resume against the job requirements. Focus on accuracy and be stric
             resume_text, resume_file, processing_time
         )
 
-    except asyncio.TimeoutError:
-        logger.error(f"Timeout processing {resume_file}")
-        return create_fallback_response(
-            contact, role, jd_similarity, resume_text, 
-            resume_file, "Analysis timeout"
-        )
+
     except Exception as e:
         logger.error(f"Error processing {resume_file}: {str(e)}")
         return create_fallback_response(

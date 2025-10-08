@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Zap, Shield, BarChart3, Mail, CheckCircle } from 'lucide-react';
+import { ArrowRight, Zap, Shield, BarChart3, Mail } from 'lucide-react';
 
 const LandingPage = () => {
   const navigate = useNavigate();
@@ -8,7 +8,7 @@ const LandingPage = () => {
   const styles = {
     container: {
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+      background: '#1E3A8A'
     },
     header: {
       padding: '20px 40px',
@@ -24,7 +24,7 @@ const LandingPage = () => {
       fontSize: '24px',
       fontWeight: 600
     },
-    logoIcon: {
+    logoIconContainer: {
       width: '40px',
       height: '40px',
       background: '#ffffff',
@@ -32,9 +32,13 @@ const LandingPage = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: '#667eea',
-      fontSize: '20px',
-      fontWeight: 'bold'
+      padding: '4px'
+    },
+    logoImg: {
+      width: '100%',
+      height: '100%',
+      objectFit: 'contain',
+      display: 'block'
     },
     hero: {
       maxWidth: '1200px',
@@ -61,7 +65,7 @@ const LandingPage = () => {
       fontSize: '16px',
       fontWeight: 500,
       background: '#ffffff',
-      color: '#667eea',
+      color: '#1E3A8A',
       border: 'none',
       borderRadius: '8px',
       cursor: 'pointer',
@@ -95,7 +99,7 @@ const LandingPage = () => {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      color: '#667eea',
+      color: '#1E3A8A',
       marginBottom: '20px'
     },
     featureTitle: {
@@ -138,7 +142,17 @@ const LandingPage = () => {
     <div style={styles.container}>
       <header style={styles.header}>
         <div style={styles.logo}>
-          <div style={styles.logoIcon}>E</div>
+          <div style={styles.logoIconContainer}>
+            <img 
+              src={`${process.env.PUBLIC_URL}/logo.png`}
+              alt="EazyAI" 
+              style={styles.logoImg}
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.parentElement.innerHTML = '<span style="color:#1E3A8A;font-size:20px;font-weight:bold;">EA</span>';
+              }}
+            />
+          </div>
           EazyAI
         </div>
       </header>
