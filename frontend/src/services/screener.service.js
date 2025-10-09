@@ -1,6 +1,12 @@
 import api from './api';
 import { ENDPOINTS } from '../utils/constants';
 
+// Session storage keys
+const STORAGE_KEYS = {
+  LAST_RESULTS: 'eazyai_last_results',
+  SESSION_ID: 'eazyai_session_id'
+};
+
 export const screenerService = {
   analyzeResumes: async (jobConfig) => {
     const { load_from_blob, ...configWithoutFlag } = jobConfig;
@@ -9,7 +15,39 @@ export const screenerService = {
       job_config: configWithoutFlag,
       load_from_blob: load_from_blob !== false
     });
+    
+    // Save results to session storage automatically
+    if (response.data) {
+      sessionStorage.setItem(STORAGE_KEYS.LAST_RESULTS, JSON.stringify(response.data));
+      if (response.data.metrics?.session_id) {
+        sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, response.data.metrics.session_id);
+      }
+    }
+    
     return response.data;
+  },
+  
+  // Get cached results from session storage
+  getCachedResults: () => {
+    try {
+      const cached = sessionStorage.getItem(STORAGE_KEYS.LAST_RESULTS);
+      return cached ? JSON.parse(cached) : null;
+    } catch (error) {
+      console.error('Failed to parse cached results:', error);
+      return null;
+    }
+  },
+  
+  // Get results from backend by session ID
+  getResultsBySessionId: async (sessionId) => {
+    const response = await api.get(`/api/screener/results/${sessionId}`);
+    return response.data;
+  },
+  
+  // Clear cached results
+  clearCache: () => {
+    sessionStorage.removeItem(STORAGE_KEYS.LAST_RESULTS);
+    sessionStorage.removeItem(STORAGE_KEYS.SESSION_ID);
   },
   
   uploadResume: async (file) => {
@@ -44,6 +82,16 @@ export const screenerService = {
       candidate_id: candidateId,
       ...updates
     });
+    
+    // Update cached results if they exist
+    const cached = screenerService.getCachedResults();
+    if (cached && cached.candidates) {
+      cached.candidates = cached.candidates.map(c => 
+        c.email === candidateId ? { ...c, ...updates } : c
+      );
+      sessionStorage.setItem(STORAGE_KEYS.LAST_RESULTS, JSON.stringify(cached));
+    }
+    
     return response.data;
   },
   
