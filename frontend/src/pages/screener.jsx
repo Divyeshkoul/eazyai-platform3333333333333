@@ -22,7 +22,6 @@ const Screener = () => {
 
   const loadBlobFiles = async () => {
     try {
-      // Get list of files from blob storage
       const response = await api.get('/api/screener/list-blob-files');
       setBlobFiles(response.data.data?.files || []);
     } catch (error) {
@@ -81,7 +80,7 @@ const Screener = () => {
         }
       }
       
-      await loadBlobFiles(); // Refresh blob files list
+      await loadBlobFiles();
       alert(`✓ Uploaded ${uploadedList.length} file(s) to Azure Blob Storage!\n\nCHECK "Load from Azure" checkbox and click "Start Analysis".`);
     } catch (error) {
       console.error('Upload failed:', error);
@@ -132,11 +131,15 @@ const Screener = () => {
     }
   };
 
+  // ✅ UPDATED FUNCTION: Save before navigation
   const handleAnalyze = async (config) => {
     try {
       setAnalyzing(true);
       const result = await screenerService.analyzeResumes(config);
-      
+
+      // 💾 Save results to sessionStorage before navigating
+      sessionStorage.setItem("screenerResults", JSON.stringify(result));
+
       alert(`✓ Analysis Complete!\n\nProcessed: ${result.total_processed} candidates\nTime: ${result.processing_time.toFixed(1)}s\nAvg: ${result.metrics.avg_time_per_resume}s per resume`);
       
       setTimeout(() => {
@@ -167,19 +170,9 @@ const Screener = () => {
       transition: 'all 0.3s ease',
       paddingRight: sliderOpen ? '0' : '20px'
     },
-    header: {
-      marginBottom: '24px'
-    },
-    title: {
-      fontSize: '28px',
-      fontWeight: 400,
-      color: '#202124',
-      margin: '0 0 8px 0'
-    },
-    subtitle: {
-      fontSize: '14px',
-      color: '#5f6368'
-    },
+    header: { marginBottom: '24px' },
+    title: { fontSize: '28px', fontWeight: 400, color: '#202124', margin: '0 0 8px 0' },
+    subtitle: { fontSize: '14px', color: '#5f6368' },
     actionsBar: {
       display: 'grid',
       gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
@@ -218,14 +211,8 @@ const Screener = () => {
       border: 'none',
       textAlign: 'center'
     },
-    uploadTempButton: {
-      background: '#f9ab00',
-      color: '#ffffff'
-    },
-    uploadBlobButton: {
-      background: '#1a73e8',
-      color: '#ffffff'
-    },
+    uploadTempButton: { background: '#f9ab00', color: '#ffffff' },
+    uploadBlobButton: { background: '#1a73e8', color: '#ffffff' },
     syncButton: {
       padding: '10px 16px',
       fontSize: '13px',
@@ -277,9 +264,7 @@ const Screener = () => {
       display: 'flex',
       alignItems: 'center'
     },
-    hiddenInput: {
-      display: 'none'
-    },
+    hiddenInput: { display: 'none' },
     sliderContainer: {
       position: 'fixed',
       right: sliderOpen ? '0' : '-400px',
@@ -307,12 +292,7 @@ const Screener = () => {
       zIndex: 101,
       boxShadow: '-2px 0 8px rgba(0,0,0,0.1)'
     },
-    emptyState: {
-      textAlign: 'center',
-      padding: '20px',
-      color: '#5f6368',
-      fontSize: '13px'
-    }
+    emptyState: { textAlign: 'center', padding: '20px', color: '#5f6368', fontSize: '13px' }
   };
 
   if (analyzing) {
@@ -336,29 +316,13 @@ const Screener = () => {
             <p style={styles.subtitle}>Upload resumes and configure analysis settings</p>
           </div>
 
-          {/* Upload Actions Grid */}
+          {/* Upload Actions */}
           <div style={styles.actionsBar}>
-            {/* Temporary Upload Card */}
+            {/* Temporary Upload */}
             <div style={styles.uploadCard}>
-              <div style={styles.cardTitle}>
-                <Upload size={16} />
-                Temporary Storage
-              </div>
-              
-              <input
-                type="file"
-                id="resume-upload-temp"
-                multiple
-                accept=".pdf,.doc,.docx"
-                onChange={handleFileUploadTemp}
-                style={styles.hiddenInput}
-              />
-              <label 
-                htmlFor="resume-upload-temp" 
-                style={{ ...styles.uploadLabel, ...styles.uploadTempButton }}
-                onMouseEnter={(e) => !uploading && (e.target.style.background = '#ea8b00')}
-                onMouseLeave={(e) => !uploading && (e.target.style.background = '#f9ab00')}
-              >
+              <div style={styles.cardTitle}><Upload size={16}/> Temporary Storage</div>
+              <input type="file" id="resume-upload-temp" multiple accept=".pdf,.doc,.docx" onChange={handleFileUploadTemp} style={styles.hiddenInput}/>
+              <label htmlFor="resume-upload-temp" style={{ ...styles.uploadLabel, ...styles.uploadTempButton }}>
                 {uploading ? 'Uploading...' : 'Browse Files'}
               </label>
 
@@ -368,44 +332,19 @@ const Screener = () => {
                 ) : (
                   uploadedFiles.map((file, index) => (
                     <div key={index} style={styles.fileItem}>
-                      <div style={styles.fileName}>
-                        <FileText size={14} />
-                        {file}
-                      </div>
-                      <button
-                        style={styles.deleteButton}
-                        onClick={() => handleDeleteTemp(file)}
-                        title="Delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <div style={styles.fileName}><FileText size={14}/> {file}</div>
+                      <button style={styles.deleteButton} onClick={() => handleDeleteTemp(file)}><Trash2 size={14}/></button>
                     </div>
                   ))
                 )}
               </div>
             </div>
 
-            {/* Azure Blob Upload Card */}
+            {/* Azure Upload */}
             <div style={styles.uploadCard}>
-              <div style={styles.cardTitle}>
-                <Upload size={16} />
-                Azure Blob Storage
-              </div>
-              
-              <input
-                type="file"
-                id="resume-upload-blob"
-                multiple
-                accept=".pdf,.doc,.docx"
-                onChange={handleFileUploadBlob}
-                style={styles.hiddenInput}
-              />
-              <label 
-                htmlFor="resume-upload-blob" 
-                style={{ ...styles.uploadLabel, ...styles.uploadBlobButton }}
-                onMouseEnter={(e) => !uploading && (e.target.style.background = '#1557b0')}
-                onMouseLeave={(e) => !uploading && (e.target.style.background = '#1a73e8')}
-              >
+              <div style={styles.cardTitle}><Upload size={16}/> Azure Blob Storage</div>
+              <input type="file" id="resume-upload-blob" multiple accept=".pdf,.doc,.docx" onChange={handleFileUploadBlob} style={styles.hiddenInput}/>
+              <label htmlFor="resume-upload-blob" style={{ ...styles.uploadLabel, ...styles.uploadBlobButton }}>
                 {uploading ? 'Uploading...' : 'Upload to Azure'}
               </label>
 
@@ -415,17 +354,8 @@ const Screener = () => {
                 ) : (
                   blobFiles.slice(0, 10).map((file, index) => (
                     <div key={index} style={styles.fileItem}>
-                      <div style={styles.fileName}>
-                        <FileText size={14} />
-                        {file}
-                      </div>
-                      <button
-                        style={styles.deleteButton}
-                        onClick={() => handleDeleteBlob(file)}
-                        title="Delete"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <div style={styles.fileName}><FileText size={14}/> {file}</div>
+                      <button style={styles.deleteButton} onClick={() => handleDeleteBlob(file)}><Trash2 size={14}/></button>
                     </div>
                   ))
                 )}
@@ -435,42 +365,24 @@ const Screener = () => {
               </div>
             </div>
 
-            {/* Gmail Sync Card */}
+            {/* Gmail Sync */}
             <div style={styles.uploadCard}>
-              <div style={styles.cardTitle}>
-                <RefreshCw size={16} />
-                Gmail Integration
-              </div>
-              
-              <button
-                style={styles.syncButton}
-                onClick={handleGmailSync}
-                disabled={syncing}
-                onMouseEnter={(e) => !syncing && (e.target.style.background = '#188038')}
-                onMouseLeave={(e) => !syncing && (e.target.style.background = '#34a853')}
-              >
+              <div style={styles.cardTitle}><RefreshCw size={16}/> Gmail Integration</div>
+              <button style={styles.syncButton} onClick={handleGmailSync} disabled={syncing}>
                 {syncing ? 'Syncing...' : 'Sync Gmail Now'}
               </button>
-
-              <div style={styles.emptyState}>
-                Syncs to Azure Blob
-              </div>
+              <div style={styles.emptyState}>Syncs to Azure Blob</div>
             </div>
           </div>
         </div>
 
-        {/* Slider Toggle Button */}
-        <button
-          style={styles.toggleButton}
-          onClick={() => setSliderOpen(!sliderOpen)}
-          title={sliderOpen ? 'Hide Configuration' : 'Show Configuration'}
-        >
-          {sliderOpen ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+        {/* Slider */}
+        <button style={styles.toggleButton} onClick={() => setSliderOpen(!sliderOpen)}>
+          {sliderOpen ? <ChevronRight size={20}/> : <ChevronLeft size={20}/>}
         </button>
 
-        {/* Right Side Slider */}
         <div style={styles.sliderContainer}>
-          <JobConfiguration onAnalyze={handleAnalyze} loading={analyzing} />
+          <JobConfiguration onAnalyze={handleAnalyze} loading={analyzing}/>
         </div>
       </div>
 
